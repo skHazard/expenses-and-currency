@@ -11,8 +11,10 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.sql.Date;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -26,28 +28,53 @@ public class BalanceService {
     }
 
     public void add(String date,String amount,String currency,String product)  {
-        SimpleDateFormat sdf = new SimpleDateFormat();
-        try {
-            Balance balance = new Balance((Date) sdf.parse(date),Currency.valueOf(currency), Double.parseDouble(amount), product);
+         try {
+           Balance balance =
+                    new Balance(parseDate(date)
+                            ,Currency.valueOf(currency)
+                            , Double.parseDouble(amount)
+                            , product);
             balanceDAO.add(balance);
         } catch (ParseException e) {
             e.printStackTrace();
         }
 
+
+
     }
     public void delete(String date){
-        SimpleDateFormat sdf = new SimpleDateFormat();
         try {
-            balanceDAO.deleteByDate((Date) sdf.parse(date));
+            balanceDAO.deleteByDate(parseDate(date));
         } catch (ParseException e) {
             e.printStackTrace();
         }
     }
 
-    public void total(Currency currency){
+    private Date parseDate(String dateToParse) throws ParseException {
+        DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        return new Date(formatter.parse(dateToParse).getTime());
+    }
 
-        String url = "http://api.fixer.io/latest";
+    public Double total(Currency currency){
+        Map<Currency,Double> result = balanceDAO.getAmountAndCurrency();
+        Double sum = 0.0;
+        CurrencyAPIResponse currencyAPIResponse = getCurrencies(currency);
+        System.out.println(currencyAPIResponse.base);
+        System.out.println(currencyAPIResponse.rates);
+        for (Map.Entry<Currency,Double> entry :result.entrySet()) {
+            sum = sum+
+                    entry.getValue()
+                            / (!currency.equals(entry.getKey())?
+                            Double.parseDouble(
+                                    currencyAPIResponse.rates.get(entry.getKey().toString())):1);
+        }
+        return  sum;
+    }
+
+    private CurrencyAPIResponse getCurrencies(Currency currency){
+        String url = "http://api.fixer.io/latest?base="+currency;
         URL obj;
+        CurrencyAPIResponse result = null;
         try {
             obj = new URL(url);
             HttpURLConnection con = (HttpURLConnection) obj.openConnection();
@@ -58,14 +85,16 @@ public class BalanceService {
             while(bis.available()>0) {
                 sb.append((char)bis.read());
             }
-            CurrencyAPIResponse response = gson.fromJson(sb.toString(),CurrencyAPIResponse.class);
-            System.out.println(response);
-            System.out.println(response.rates.get("USD"));
+            result = gson.fromJson(sb.toString(),CurrencyAPIResponse.class);
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return result;
     }
 
+    public List<Balance> list() {
+        return balanceDAO.list();
+    }
     private class CurrencyAPIResponse {
 
 
