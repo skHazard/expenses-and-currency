@@ -13,11 +13,11 @@ public class BalanceDAO {
     private Connection connection;
 
     public BalanceDAO(){
-//        try {
-//            connection =  DriverManager.getConnection("jdbc:mysql://localhost:");
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
+        try {
+            connection =  DriverManager.getConnection("jdbc:mysql://localhost:3306");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     public int add(Balance balance){
