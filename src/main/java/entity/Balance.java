@@ -57,11 +57,9 @@ public class Balance {
 
     @Override
     public String toString() {
-        return "Balance{" +
-                "date=" + date +
-                ", currency=" + currency +
-                ", amount=" + amount +
-                ", product='" + product + '\'' +
-                '}';
+        return date +
+                " " + product +
+                " " + amount +
+                " " + currency ;
     }
 }

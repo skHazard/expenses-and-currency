@@ -23,26 +23,42 @@ import java.util.Map;
 public class BalanceService {
 
     private BalanceDAO balanceDAO;
-    public BalanceService(){
+
+    public BalanceService() {
         balanceDAO = new BalanceDAO();
     }
 
-    public void add(String date,String amount,String currency,String product)  {
-         try {
-           Balance balance =
+    public void add(String date, String amount, String currency, String product) {
+        try {
+            Balance balance =
                     new Balance(parseDate(date)
-                            ,Currency.valueOf(currency)
+                            , Currency.valueOf(currency)
                             , Double.parseDouble(amount)
                             , product);
             balanceDAO.add(balance);
         } catch (ParseException e) {
             e.printStackTrace();
         }
+    }
 
+    public void printExpenses() {
+        List<Balance> result = balanceDAO.list();
+        Date curDate = null;
+        for (Balance balance : result) {
+            if (!balance.getDate().equals(curDate)) {
+                curDate = balance.getDate();
+                System.out.println("\n" + curDate);
+            }
+            System.out.println(balance.getProduct()
+                    + " " + balance.getAmount()
+                    + " " + balance.getCurrency());
+
+        }
 
 
     }
-    public void delete(String date){
+
+    public void delete(String date) {
         try {
             balanceDAO.deleteByDate(parseDate(date));
         } catch (ParseException e) {
@@ -55,37 +71,36 @@ public class BalanceService {
         return new Date(formatter.parse(dateToParse).getTime());
     }
 
-    public Double total(Currency currency){
-        Map<Currency,Double> result = balanceDAO.getAmountAndCurrency();
+    public Double total(Currency currency) {
+        Map<Currency, Double> result = balanceDAO.getAmountAndCurrency();
         Double sum = 0.0;
         CurrencyAPIResponse currencyAPIResponse = getCurrencies(currency);
-        System.out.println(currencyAPIResponse.base);
-        System.out.println(currencyAPIResponse.rates);
-        for (Map.Entry<Currency,Double> entry :result.entrySet()) {
-            sum = sum+
+        for (Map.Entry<Currency, Double> entry : result.entrySet()) {
+            sum = sum +
                     entry.getValue()
-                            / (!currency.equals(entry.getKey())?
+                            / (!currency.equals(entry.getKey()) ?
                             Double.parseDouble(
-                                    currencyAPIResponse.rates.get(entry.getKey().toString())):1);
+                                    currencyAPIResponse.rates.get(entry.getKey().toString())) : 1);
         }
-        return  sum;
+        return sum;
     }
 
-    private CurrencyAPIResponse getCurrencies(Currency currency){
-        String url = "http://api.fixer.io/latest?base="+currency;
+    //request to fixer.io API to get ratio for base currency
+    private CurrencyAPIResponse getCurrencies(Currency currency) {
+        String url = "http://api.fixer.io/latest?base=" + currency;
         URL obj;
         CurrencyAPIResponse result = null;
         try {
             obj = new URL(url);
             HttpURLConnection con = (HttpURLConnection) obj.openConnection();
             con.setRequestMethod("GET");
-            Gson gson= new Gson();
+            Gson gson = new Gson();
             BufferedInputStream bis = new BufferedInputStream(con.getInputStream());
             StringBuilder sb = new StringBuilder();
-            while(bis.available()>0) {
-                sb.append((char)bis.read());
+            while (bis.available() > 0) {
+                sb.append((char) bis.read());
             }
-            result = gson.fromJson(sb.toString(),CurrencyAPIResponse.class);
+            result = gson.fromJson(sb.toString(), CurrencyAPIResponse.class);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -95,13 +110,12 @@ public class BalanceService {
     public List<Balance> list() {
         return balanceDAO.list();
     }
-    private class CurrencyAPIResponse {
 
+    private class CurrencyAPIResponse {
 
         public String base;
         public String date;
         public Map<String, String> rates;
-
 
         @Override
         public String toString() {

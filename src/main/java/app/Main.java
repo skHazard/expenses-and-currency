@@ -14,8 +14,8 @@ import java.util.List;
  */
 public class Main {
 
-    public static  void main(String[] args){
-        System.out.println("Commands:");
+    public static void main(String[] args) {
+        System.out.println("Please, enter Commands like its written below:");
         System.out.println("add yyyy-mm-dd amount CUR product");
         System.out.println("clear yyyy-mm-dd");
         System.out.println("list");
@@ -25,31 +25,33 @@ public class Main {
 
         String command = "";
         do {
-            System.out.println("Please enter command:\n");
+            System.out.println(" \n Please, enter command: \n");
             command = ScannerSingleton.getSc().nextLine();
-            command = command.replaceAll("\\s+"," ");
-            System.out.println(command);
-            if(command.startsWith("add")){
+            //replace all whitespaces with single space
+            command = command.replaceAll("\\s+", " ");
+            if (command.startsWith("add")) {
                 String[] params = command.split(" ");
-                if(params.length==5) {
+                if (params.length == 5) {
                     balanceService.add(params[1], params[2], params[3], params[4]);
+                    balanceService.printExpenses();
                 }
-            }else if(command.startsWith("clear")){
+            } else if (command.startsWith("clear")) {
                 String[] params = command.split(" ");
                 balanceService.delete(params[1]);
-            }else if (command.startsWith("total")) {
+                balanceService.printExpenses();
+            } else if (command.startsWith("total")) {
                 String[] params = command.split(" ");
                 double res = balanceService.total(Currency.valueOf(params[1]));
                 NumberFormat formatter = new DecimalFormat("#0.00");
-                System.out.println("Total spends: " + formatter.format(res) + " " + params[1]);
-            }else if (command.startsWith("list")){
+                System.out.println("Total expenses in " + params[1] + ": " + formatter.format(res) + " " + params[1]);
+            } else if (command.startsWith("list")) {
                 List<Balance> result = balanceService.list();
                 for (Balance balance : result) {
                     System.out.println(balance.toString());
                 }
 
             }
-        }while (!command.equals("exit"));
+        } while (!command.equals("exit"));
 
     }
 }
