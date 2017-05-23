@@ -10,9 +10,9 @@ Amount - your's expense in decimal, CUR - Currency (USD, EUR, PLN etc.),
 Product - name of product you've made expenses for.
 
 You can use following COMMANDS to work with App:
- exit - stops the app
- list - shows all expences
- add - adds new expense (should be written like: **add yyyy-mm-dd Amount CUR Product** sample)
- clear - deletes expense by date (should be written like: **clear yyyy-mm-dd** sample)
- total CUR - shows all expences in selected CUR (getting rates from fixer.io API, where CUR is currency you select)
+ 	exit - stops the app; 
+ 	list - shows all expences; 
+ 	add - adds new expense (should be written like: **add yyyy-mm-dd Amount CUR Product** sample); 
+ 	clear - deletes expense by date (should be written like: **clear yyyy-mm-dd** sample); 
+ 	total CUR - shows all expences in selected CUR (getting rates from fixer.io API, where CUR is currency you select).
  
